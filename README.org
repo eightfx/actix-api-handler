@@ -1,33 +1,33 @@
 * What is this?
-api_type_handler is a procedural macro designed to simplify the process of creating APIs with Actix-web, making your code cleaner and more maintainable.
+=api_type_handler= is a procedural macro designed to simplify the process of creating APIs with Actix-web, making your code cleaner and more maintainable.
 * Motivation
 Ordinarily, when creating APIs with Actix-web, functions carry arguments and return values as follows:
 
 #+begin_src rust
 pub async fn register(
-query: web::Json<MyQuery>, 
-path: web::Path<MyPath>,
-body: web::Form<MyForm>,
-db_pool: web::Data<Pool<MySql>>) -> impl Responder;
+query: actix_web::web::Json<MyQuery>, 
+path: actix_web::web::Path<MyPath>,
+body: actix_web::web::Form<MyForm>,
+db_pool: actix_web::web::Data<Pool<MySql>>) -> impl Responder;
 
 #+end_src
-However, this approach has some limitations. Firstly, you must frequently use the into_inner method on path or query to access the underlying struct. Secondly, since the return type is not a Result, you have to write extensive error branching code, leading to deeply nested structures.
+However, this approach has some limitations. Firstly, you must frequently use the =into_inner= method on path or query to access the underlying struct. Secondly, since the return type is not a Result, you have to write extensive error branching code, leading to deeply nested structures.
 
-The api_type_handler proc_macro was developed to overcome these hurdles. With this macro, you can now write your function as follows:
+This crate was developed to overcome these hurdles. With this macro, you can now write your function as follows:
 #+begin_src rust
 pub async fn register(
 query: MyQuery, 
 path: MyPath,
 body: MyForm,
-db_pool: web::Data<Pool<MySql>>) -> Result<MyResponse, ApiError>;
+db_pool: actix_web::web::Data<Pool<MySql>>) -> Result<MyResponse, ApiError>;
 
 #+end_src
 * Benefit
 - Simpler Arguments: Arguments are passed directly as structs, making the code cleaner and easier to read.
 - Error Handling: The return type is Result, which allows for more straightforward error handling within the function using the ? operator.
-- Custom Error Responses: You can control the behavior for error cases by implementing actix_web::error::ResponseError for ApiError.
+- Custom Error Responses: You can control the behavior for error cases by implementing =actix_web::error::ResponseError= for ApiError.
 - Flexible Types: The function takes MyStruct as an argument and a Result-wrapped MyResponse as a return type, enabling the creation of unique argument and return types for each API.
-By using the api_type_handler proc_macro, you can achieve streamlined and maintainable code structures, reduce redundancy, and improve the overall readability and maintainability of your Actix-web applications.
+By using the crate, you can achieve streamlined and maintainable code structures, reduce redundancy, and improve the overall readability and maintainability of your Actix-web applications.
 * Usage
 ** Create ApiResponse
 #+begin_src rust
@@ -114,7 +114,7 @@ Note that these are not required arguments, but if they are taken as arguments, 
 The type name may be defined freely.
 ** Add to your router
 
-Please add _api as a postfix for your defined function name.
+Please add =_api= as a postfix for your defined function name.
 #+begin_src rust 
 .route("/api/auth/register", web::post().to(auth::register_api))
 #+end_src

@@ -36,16 +36,16 @@ pub fn type_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
             if let Pat::Ident(ref pat_ident) = *arg_name {
                 if pat_ident.ident == "query" {
                     request_type = Some(arg_type);
-                    new_args.push(quote! {web::Query(query): web::Query<#request_type>});
+                    new_args.push(quote! {actix_web::web::Query(query): actix_web::web::Query<#request_type>});
                     call_args.push(quote! {query});
                 } else if pat_ident.ident == "body" {
                     request_type = Some(arg_type);
-                    new_args.push(quote! {body: web::Json<#request_type>});
+                    new_args.push(quote! {body: actix_web::web::Json<#request_type>});
                     call_args.push(quote! {body.into_inner()});
 
 				} else if pat_ident.ident == "path" {
 					request_type = Some(arg_type);
-					new_args.push(quote! {path: web::Path<#request_type>});
+					new_args.push(quote! {path: actix_web::web::Path<#request_type>});
 					call_args.push(quote! {path.into_inner()});
 				} else
 
