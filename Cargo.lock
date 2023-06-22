@@ -3,7 +3,7 @@
 version = 3
 
 [[package]]
-name = "api_handler"
+name = "actix_type_handler"
 version = "0.1.0"
 dependencies = [
  "proc-macro2",

@@ -1,143 +1,81 @@
 
 # Table of Contents
 
-1.  [API Handler](#org3276e41)
-2.  [Key Features of the Crate](#org23ecc8e)
-3.  [Example](#org678e36e)
-    1.  [Before:](#orge43980f)
-    2.  [After:](#orgdffc84d)
-    3.  [What is the difference?](#org79ebc44)
-4.  [Usage](#orga597a5b)
-    1.  [Create an ApiError with Thiserror](#orgd176b49)
-    2.  [Create ApiResponse](#org922cd5f)
-    3.  [Create your argument and return types](#org83c72f6)
-    4.  [Write your API's logic](#org925fb9d)
+1.  [What is this?](#orgb8069b7)
+2.  [Motivation](#orga13f67f)
+3.  [Benefit](#org93efd2e)
+4.  [Usage](#orgb55ab6f)
+    1.  [Create ApiResponse](#org3ba8989)
+    2.  [Create an ApiError with Thiserror](#orgbc4af9d)
+    3.  [Create your argument and return types](#org4cd1c0e)
+    4.  [Write your API's logic](#org1c48275)
+        1.  [query](#org06d2ea1)
+        2.  [path](#org5dbe472)
+        3.  [body](#org7e01fa5)
+    5.  [Add to your router](#org2ed91c6)
 
 
-<a id="org3276e41"></a>
+<a id="orgb8069b7"></a>
 
-# API Handler
+# What is this?
 
-The API Handler crate provides a convenient way to handle API endpoints in Rust. It leverages Rust's macro system to automatically generate API handlers, simplifying error handling and data parsing.
-
-
-<a id="org23ecc8e"></a>
-
-# Key Features of the Crate
-
-The key strength of this crate is the ease of error handling for API logic. When calling a function that returns a Result, simply use the ? operator; if the result is Ok, the value will be returned as is, while if the result is Err, the error handling defined in ResponseError will be automatically executed. Additionally, you only need to pass the argument type and return the response type, without needing to handle the HttpResponse directly.
+api<sub>type</sub><sub>handler</sub> is a procedural macro designed to simplify the process of creating APIs with Actix-web, making your code cleaner and more maintainable.
 
 
-<a id="org678e36e"></a>
+<a id="orga13f67f"></a>
 
-# Example
+# Motivation
 
+Ordinarily, when creating APIs with Actix-web, functions carry arguments and return values as follows:
 
-<a id="orge43980f"></a>
+    pub async fn register(
+    query: web::Json<MyQuery>, 
+    path: web::Path<MyPath>,
+    body: web::Form<MyForm>,
+    db_pool: web::Data<Pool<MySql>>) -> impl Responder;
 
-## Before:
+However, this approach has some limitations. Firstly, you must frequently use the into<sub>inner</sub> method on path or query to access the underlying struct. Secondly, since the return type is not a Result, you have to write extensive error branching code, leading to deeply nested structures.
 
-    #[derive(Serialize, Deserialize)]
-    pub struct RequestRegister {
-    	username: String,
-    	password: String,
-    	email: String,
-    }
-    
-    
-    pub async fn register(web::Json(info): web::Json<RequestRegister>, db_pool: web::Data<Pool<MySql>>) -> impl Responder {
-    	let hashed_password = User::hash_password(&info.password);
-    	let user_id = Uuid::new_v4();
-    	let result = sqlx::query!(
-    		"INSERT INTO user (user_id, username, email, password_hash) VALUES (?, ?, ?, ?)",
-    		user_id.to_string(),
-    		&info.username,
-    		&info.email,
-    		hashed_password
-    	)
-    		.execute(&**db_pool)
-    		.await;
-    
-    	match result {
-    		Ok(_) => HttpResponse::Created().finish(),
-    		Err(e) => {
-    			if let sqlx::Error::Database(db_err) = &e {
-    				if db_err.message().contains("Duplicate entry") {
-    					return HttpResponse::Conflict().body("Username or email already taken");
-    				}
-    			}
-    			HttpResponse::InternalServerError().body(format!("Database error: {:?}", e))
-    		},
-    	}
-    }
+The api<sub>type</sub><sub>handler</sub> proc<sub>macro</sub> was developed to overcome these hurdles. With this macro, you can now write your function as follows:
+
+    pub async fn register(
+    query: MyQuery, 
+    path: MyPath,
+    body: MyForm,
+    db_pool: web::Data<Pool<MySql>>) -> Result<MyResponse, ApiError>;
 
 
-<a id="orgdffc84d"></a>
+<a id="org93efd2e"></a>
 
-## After:
+# Benefit
 
-    #[derive(Serialize, Deserialize)]
-    pub struct RequestRegister {
-    	username: String,
-    	password: String,
-    	email: String,
-    }
-    
-    
-    #[derive(Serialize, Deserialize)]
-    pub struct ResponseRegister;
-    
-    
-    #[actix_api_handler::post_handler]
-    pub async fn register(data:RequestRegister, db_pool: web::Data<Pool<MySql>>) -> Result<ResponseRegister,ApiError>{
-    	let hashed_password = User::hash_password(&data.password);
-    	let user_id = Uuid::new_v4();
-    	let result = sqlx::query!(
-    		"INSERT INTO user (user_id, username, email, password_hash) VALUES (?, ?, ?, ?)",
-    		user_id.to_string(),
-    		&data.username,
-    		&data.email,
-    		hashed_password
-    	)
-    		.execute(&**db_pool)
-    		.await.map_err(|_| AuthError::InvalidCredentials)?;
-    
-    	Ok(ResponseRegister{})
-    }
+-   Simpler Arguments: Arguments are passed directly as structs, making the code cleaner and easier to read.
+-   Error Handling: The return type is Result, which allows for more straightforward error handling within the function using the ? operator.
+-   Custom Error Responses: You can control the behavior for error cases by implementing actix<sub>web</sub>::error::ResponseError for ApiError.
+-   Flexible Types: The function takes MyStruct as an argument and a Result-wrapped MyResponse as a return type, enabling the creation of unique argument and return types for each API.
+
+By using the api<sub>type</sub><sub>handler</sub> proc<sub>macro</sub>, you can achieve streamlined and maintainable code structures, reduce redundancy, and improve the overall readability and maintainability of your Actix-web applications.
 
 
-<a id="org79ebc44"></a>
-
-## What is the difference?
-
--   Explicitness of Purpose:
-    The use of #[actix<sub>api</sub><sub>handler</sub>::post<sub>handler</sub>] macro immediately signals the purpose of the function. In the "Before" example, it might not be immediately clear what the function is meant for. The annotation provides an instant context to other developers who may work on this code.
-
--   Better Error Handling:
-    Error handling has been made significantly simpler and more manageable in the "After" code. Instead of manually handling each error type, Result<ResponseRegister, ApiError> abstracts away the error handling into ApiError, improving readability and maintainability.
-
--   Strong Typing:
-    The creation of the ResponseRegister type makes the return type of the function clearer. In the "Before" example, there's no way of knowing what kind of response would be sent without reading through all of the code.
-
--   Cleaner Syntax:
-    The "After" example makes use of the ? operator for error propagation, which allows us to avoid verbose match expressions. This makes the function much easier to read and understand.
-
--   Abstraction of HTTP Details:
-    In the "Before" example, HTTP response details like the status code were explicitly handled in the code. In the "After" example, these are abstracted away. This makes the code cleaner and allows developers to focus on application logic instead of protocol details.
-
--   Better Consistency:
-    By using a dedicated RequestRegister type for the input data, we ensure consistency in the way data is handled across different API endpoints.
-
--   Increased Maintainability:
-    All of the above points contribute to make the "After" code more maintainable. It's easier to understand, cleaner, and will be more straightforward to modify in the future.
-
-
-<a id="orga597a5b"></a>
+<a id="orgb55ab6f"></a>
 
 # Usage
 
 
-<a id="orgd176b49"></a>
+<a id="org3ba8989"></a>
+
+## Create ApiResponse
+
+    #[derive(Serialize, Deserialize)]
+    pub struct ApiResponse<T> {
+        pub message: String,
+        pub data: T,
+    }
+
+This becomes your response type.
+
+
+<a id="orgbc4af9d"></a>
 
 ## Create an ApiError with Thiserror
 
@@ -165,52 +103,75 @@ The key strength of this crate is the ease of error handling for API logic. When
         }
     }
 
-This ResponseError lets you control the response on error.
+This is where you define the information to be returned to the user in the event of an error. Since the error type is enum, it is possible to define error messages and statuses without omissions.
 
 
-<a id="org922cd5f"></a>
-
-## Create ApiResponse
-
-    #[derive(Serialize, Deserialize)]
-    pub struct ApiResponse<T> {
-        pub message: String,
-        pub data: T,
-    }
-
-This becomes your response type.
-
-
-<a id="org83c72f6"></a>
+<a id="org4cd1c0e"></a>
 
 ## Create your argument and return types
 
     #[derive(Deserialize, Serialize)]
-    pub struct RequestSomeApi {
+    pub struct MyOwnQuery {
+        user_name: String,
     }
     
     #[derive(Deserialize, Serialize)]
-    pub struct ResponseSomeApi {
+    pub struct MyResponse {
         id: String,
     }
 
 Note that Serialize and Deserialize are required. While the argument type may be omitted, the return type is mandatory.
 
 
-<a id="org925fb9d"></a>
+<a id="org1c48275"></a>
 
 ## Write your API's logic
 
-    #[api_handler::get_handler]
+    #[actix_type_handler::type_handler]
     pub async fn get_user_id(
-        data: RequestGetSearchWord,
+        query: MyOwnQuery,
         db_pool: web::Data<Pool<MySql>>,
         req: HttpRequest,
-    ) -> Result<ResponseGetSearchWord, ApiError> {
+    ) -> Result<MyResponse, ApiError> {
         let user= get_user(&db_pool, &req).await?;
-        Ok(user.id)
+        Ok(MyResponse{id:user.id})
     // any logic
     }
 
-The data: RequestGetSearchWord argument is optional, but if present it must be named data and be the first argument. Other arguments can be reordered or omitted as needed. The return type must be Result<T, ApiError>.
+Special arguments are query, path, and body.
+
+
+<a id="org06d2ea1"></a>
+
+### query
+
+query is a reserved argument name to receive query parameters.
+For example, it corresponds to a URL such as /api/search?s=123.
+
+
+<a id="org5dbe472"></a>
+
+### path
+
+path is a reserved argument name to receive path parameters.
+For example, it corresponds to a URL such as /user/{user<sub>id</sub>}/email.
+
+
+<a id="org7e01fa5"></a>
+
+### body
+
+body is a reserved argument name to receive body by POST and so on.
+
+Note that these are not required arguments, but if they are taken as arguments, they must be named query, path, or body to be accepted.
+The type name may be defined freely.
+
+
+<a id="org2ed91c6"></a>
+
+## Add to your router
+
+Please add \_api as a postfix for your defined function name.
+
+    .route("/api/auth/register", web::post().to(auth::register_api))
 

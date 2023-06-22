@@ -1,5 +1,5 @@
 [package]
-name = "actix_api_handler"
+name = "actix_type_handler"
 version = "0.1.0"
 edition = "2018"
 
