@@ -105,7 +105,7 @@ query is a reserved argument name to receive query parameters.
 For example, it corresponds to a URL such as /api/search?s=123.
 *** path
 path is a reserved argument name to receive path parameters.
-For example, it corresponds to a URL such as /user/{user_id}/email.
+For example, it corresponds to a URL such as /user/{=user_id=}/email.
 *** body
 body is a reserved argument name to receive body by POST and so on.
 

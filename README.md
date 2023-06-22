@@ -1,28 +1,28 @@
 
 # Table of Contents
 
-1.  [What is this?](#org0762f5d)
-2.  [Motivation](#orge15a994)
-3.  [Benefit](#orgc3e3e45)
-4.  [Usage](#org3d72f47)
-    1.  [Create ApiResponse](#org8c2a861)
-    2.  [Create an ApiError with Thiserror](#orgbd8428d)
-    3.  [Create your argument and return types](#orgc3ed405)
-    4.  [Write your API's logic](#org1605c7b)
-        1.  [query](#org9b752c7)
-        2.  [path](#orgab4e40e)
-        3.  [body](#org01a050c)
-    5.  [Add to your router](#orgbb1fe21)
+1.  [What is this?](#org4ff9257)
+2.  [Motivation](#org37797bc)
+3.  [Benefit](#orgad7d39b)
+4.  [Usage](#org2a8a1db)
+    1.  [Create ApiResponse](#org8ce425c)
+    2.  [Create an ApiError with Thiserror](#org100ecc8)
+    3.  [Create your argument and return types](#org4e09a18)
+    4.  [Write your API's logic](#org15ac7a8)
+        1.  [query](#orga0d7430)
+        2.  [path](#orge089baa)
+        3.  [body](#orgf2f82a5)
+    5.  [Add to your router](#org5c4d950)
 
 
-<a id="org0762f5d"></a>
+<a id="org4ff9257"></a>
 
 # What is this?
 
 `api_type_handler` is a procedural macro designed to simplify the process of creating APIs with Actix-web, making your code cleaner and more maintainable.
 
 
-<a id="orge15a994"></a>
+<a id="org37797bc"></a>
 
 # Motivation
 
@@ -45,7 +45,7 @@ This crate was developed to overcome these hurdles. With this macro, you can now
     db_pool: actix_web::web::Data<Pool<MySql>>) -> Result<MyResponse, ApiError>;
 
 
-<a id="orgc3e3e45"></a>
+<a id="orgad7d39b"></a>
 
 # Benefit
 
@@ -57,12 +57,12 @@ This crate was developed to overcome these hurdles. With this macro, you can now
 By using the crate, you can achieve streamlined and maintainable code structures, reduce redundancy, and improve the overall readability and maintainability of your Actix-web applications.
 
 
-<a id="org3d72f47"></a>
+<a id="org2a8a1db"></a>
 
 # Usage
 
 
-<a id="org8c2a861"></a>
+<a id="org8ce425c"></a>
 
 ## Create ApiResponse
 
@@ -75,7 +75,7 @@ By using the crate, you can achieve streamlined and maintainable code structures
 This becomes your response type.
 
 
-<a id="orgbd8428d"></a>
+<a id="org100ecc8"></a>
 
 ## Create an ApiError with Thiserror
 
@@ -106,7 +106,7 @@ This becomes your response type.
 This is where you define the information to be returned to the user in the event of an error. Since the error type is enum, it is possible to define error messages and statuses without omissions.
 
 
-<a id="orgc3ed405"></a>
+<a id="org4e09a18"></a>
 
 ## Create your argument and return types
 
@@ -123,7 +123,7 @@ This is where you define the information to be returned to the user in the event
 Note that Serialize and Deserialize are required. While the argument type may be omitted, the return type is mandatory.
 
 
-<a id="org1605c7b"></a>
+<a id="org15ac7a8"></a>
 
 ## Write your API's logic
 
@@ -141,7 +141,7 @@ Note that Serialize and Deserialize are required. While the argument type may be
 Special arguments are query, path, and body.
 
 
-<a id="org9b752c7"></a>
+<a id="orga0d7430"></a>
 
 ### query
 
@@ -149,15 +149,15 @@ query is a reserved argument name to receive query parameters.
 For example, it corresponds to a URL such as /api/search?s=123.
 
 
-<a id="orgab4e40e"></a>
+<a id="orge089baa"></a>
 
 ### path
 
 path is a reserved argument name to receive path parameters.
-For example, it corresponds to a URL such as /user/{user<sub>id</sub>}/email.
+For example, it corresponds to a URL such as /user/{`user_id`}/email.
 
 
-<a id="org01a050c"></a>
+<a id="orgf2f82a5"></a>
 
 ### body
 
@@ -167,7 +167,7 @@ Note that these are not required arguments, but if they are taken as arguments, 
 The type name may be defined freely.
 
 
-<a id="orgbb1fe21"></a>
+<a id="org5c4d950"></a>
 
 ## Add to your router
 
