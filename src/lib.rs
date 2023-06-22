@@ -17,7 +17,7 @@ pub fn type_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let args = &fn_item.sig.inputs;
 
-    let return_type = match &fn_item.sig.output {
+    let _return_type = match &fn_item.sig.output {
         ReturnType::Type(_, ty) => match &**ty {
             syn::Type::Path(path) => &path.path.segments[0].ident,
             _ => panic!("The function must return a Result."),
@@ -25,7 +25,7 @@ pub fn type_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
         _ => panic!("The function must return a Result."),
     };
 
-    let mut request_type = None;
+    let mut _request_type = None;
     let mut new_args = Vec::new();
     let mut call_args = Vec::new();
 
@@ -35,21 +35,19 @@ pub fn type_handler(_attr: TokenStream, item: TokenStream) -> TokenStream {
             let arg_type = &*pat_type.ty;
             if let Pat::Ident(ref pat_ident) = *arg_name {
                 if pat_ident.ident == "query" {
-                    request_type = Some(arg_type);
-                    new_args.push(quote! {actix_web::web::Query(query): actix_web::web::Query<#request_type>});
+                    _request_type = Some(arg_type);
+                    new_args.push(quote! {actix_web::web::Query(query): actix_web::web::Query<#_request_type>});
                     call_args.push(quote! {query});
                 } else if pat_ident.ident == "body" {
-                    request_type = Some(arg_type);
-                    new_args.push(quote! {body: actix_web::web::Json<#request_type>});
+                    _request_type = Some(arg_type);
+                    new_args.push(quote! {body: actix_web::web::Json<#_request_type>});
                     call_args.push(quote! {body.into_inner()});
 
 				} else if pat_ident.ident == "path" {
-					request_type = Some(arg_type);
-					new_args.push(quote! {path: actix_web::web::Path<#request_type>});
+					_request_type = Some(arg_type);
+					new_args.push(quote! {path: actix_web::web::Path<#_request_type>});
 					call_args.push(quote! {path.into_inner()});
-				} else
-
-				{
+				} else{
 					new_args.push(quote! {#arg_name: #arg_type});
 					call_args.push(quote! {#arg_name});
 				}

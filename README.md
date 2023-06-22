@@ -1,28 +1,28 @@
 
 # Table of Contents
 
-1.  [What is this?](#org4ff9257)
-2.  [Motivation](#org37797bc)
-3.  [Benefit](#orgad7d39b)
-4.  [Usage](#org2a8a1db)
-    1.  [Create ApiResponse](#org8ce425c)
-    2.  [Create an ApiError with Thiserror](#org100ecc8)
-    3.  [Create your argument and return types](#org4e09a18)
-    4.  [Write your API's logic](#org15ac7a8)
-        1.  [query](#orga0d7430)
-        2.  [path](#orge089baa)
-        3.  [body](#orgf2f82a5)
-    5.  [Add to your router](#org5c4d950)
+1.  [What is this?](#orgede2866)
+2.  [Motivation](#orgcd53ab8)
+3.  [Benefit](#org98be59f)
+4.  [Usage](#orge0383a6)
+    1.  [Create ApiResponse](#org00fbd4e)
+    2.  [Create an ApiError with Thiserror](#org17c4d42)
+    3.  [Create your argument and return types](#org435e46f)
+    4.  [Write your API's logic](#org2a81944)
+        1.  [query](#org5552f67)
+        2.  [path](#org48dba7f)
+        3.  [body](#org2d33ef9)
+    5.  [Add to your router](#orgd58cec7)
 
 
-<a id="org4ff9257"></a>
+<a id="orgede2866"></a>
 
 # What is this?
 
 `api_type_handler` is a procedural macro designed to simplify the process of creating APIs with Actix-web, making your code cleaner and more maintainable.
 
 
-<a id="org37797bc"></a>
+<a id="orgcd53ab8"></a>
 
 # Motivation
 
@@ -34,7 +34,7 @@ Ordinarily, when creating APIs with Actix-web, functions carry arguments and ret
     body: actix_web::web::Form<MyForm>,
     db_pool: actix_web::web::Data<Pool<MySql>>) -> impl Responder;
 
-However, this approach has some limitations. Firstly, you must frequently use the `into_inner` method on path or query to access the underlying struct. Secondly, since the return type is not a Result, you have to write extensive error branching code, leading to deeply nested structures.
+However, this approach has some limitations. Firstly, you must frequently use the `into_inner` method on path or query to access the underlying struct. Secondly, since the return type is not a Result, you have to write extensive error branching code.
 
 This crate was developed to overcome these hurdles. With this macro, you can now write your function as follows:
 
@@ -45,7 +45,7 @@ This crate was developed to overcome these hurdles. With this macro, you can now
     db_pool: actix_web::web::Data<Pool<MySql>>) -> Result<MyResponse, ApiError>;
 
 
-<a id="orgad7d39b"></a>
+<a id="org98be59f"></a>
 
 # Benefit
 
@@ -57,12 +57,12 @@ This crate was developed to overcome these hurdles. With this macro, you can now
 By using the crate, you can achieve streamlined and maintainable code structures, reduce redundancy, and improve the overall readability and maintainability of your Actix-web applications.
 
 
-<a id="org2a8a1db"></a>
+<a id="orge0383a6"></a>
 
 # Usage
 
 
-<a id="org8ce425c"></a>
+<a id="org00fbd4e"></a>
 
 ## Create ApiResponse
 
@@ -75,7 +75,7 @@ By using the crate, you can achieve streamlined and maintainable code structures
 This becomes your response type.
 
 
-<a id="org100ecc8"></a>
+<a id="org17c4d42"></a>
 
 ## Create an ApiError with Thiserror
 
@@ -106,7 +106,7 @@ This becomes your response type.
 This is where you define the information to be returned to the user in the event of an error. Since the error type is enum, it is possible to define error messages and statuses without omissions.
 
 
-<a id="org4e09a18"></a>
+<a id="org435e46f"></a>
 
 ## Create your argument and return types
 
@@ -123,7 +123,7 @@ This is where you define the information to be returned to the user in the event
 Note that Serialize and Deserialize are required. While the argument type may be omitted, the return type is mandatory.
 
 
-<a id="org15ac7a8"></a>
+<a id="org2a81944"></a>
 
 ## Write your API's logic
 
@@ -141,7 +141,7 @@ Note that Serialize and Deserialize are required. While the argument type may be
 Special arguments are query, path, and body.
 
 
-<a id="orga0d7430"></a>
+<a id="org5552f67"></a>
 
 ### query
 
@@ -149,7 +149,7 @@ query is a reserved argument name to receive query parameters.
 For example, it corresponds to a URL such as /api/search?s=123.
 
 
-<a id="orge089baa"></a>
+<a id="org48dba7f"></a>
 
 ### path
 
@@ -157,7 +157,7 @@ path is a reserved argument name to receive path parameters.
 For example, it corresponds to a URL such as /user/{`user_id`}/email.
 
 
-<a id="orgf2f82a5"></a>
+<a id="org2d33ef9"></a>
 
 ### body
 
@@ -167,7 +167,7 @@ Note that these are not required arguments, but if they are taken as arguments, 
 The type name may be defined freely.
 
 
-<a id="org5c4d950"></a>
+<a id="orgd58cec7"></a>
 
 ## Add to your router
 

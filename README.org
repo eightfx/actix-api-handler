@@ -11,7 +11,7 @@ body: actix_web::web::Form<MyForm>,
 db_pool: actix_web::web::Data<Pool<MySql>>) -> impl Responder;
 
 #+end_src
-However, this approach has some limitations. Firstly, you must frequently use the =into_inner= method on path or query to access the underlying struct. Secondly, since the return type is not a Result, you have to write extensive error branching code, leading to deeply nested structures.
+However, this approach has some limitations. Firstly, you must frequently use the =into_inner= method on path or query to access the underlying struct. Secondly, since the return type is not a Result, you have to write extensive error branching code.
 
 This crate was developed to overcome these hurdles. With this macro, you can now write your function as follows:
 #+begin_src rust
